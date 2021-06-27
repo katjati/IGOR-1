@@ -1,0 +1,57 @@
+﻿@model Igor.Core.Models.Terminal.AddAttendeeViewModel
+
+<div class="igor-container container-vertical edit-panel padding-50">
+    @using (Ajax.BeginForm("ValidateAttendee", "Terminal", new AjaxOptions()
+    {
+        UpdateTargetId = "terminal-content"
+    }))
+    {
+    <div class="igor-container container-vertical content-box padding-15 gap-20 fit-content-width ">
+        <div class="igor-container center gap-20 padding-15 border-bottom">
+            <span class="title-text">ADD LESSON ATTENDEE</span>
+        </div>
+        <div class="igor-container container-vertical gap-20">
+            <div class="igor-container container-horizontal container center gap-20 flex-1">
+                <div class="flex-1 right">
+                    Name
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBoxFor(m => m.Name)
+                    <div class="flex-1 center">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Name"].Errors.Any())
+                        {
+                            <span class="field-validation-error">@ViewData.ModelState["Name"].Errors[0].ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="igor-container container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Modifier
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBoxFor(m => m.Modifier)
+                    <div class="flex-1 center">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Modifier"].Errors.Any())
+                        {
+                            <span class="field-validation-error">@ViewData.ModelState["Modifier"].Errors[0].ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.Faction)
+        @Html.HiddenFor(m => m.Id)
+        @Html.HiddenFor(m => m.LessonId)
+        <div class="modal-footer igor-container container-horizontal gap-10 margin-top">
+            <button type="submit" value="submit" class="flex-1 igor-button-main ">
+                SAVE
+            </button>
+            @Ajax.ActionLink("CANCEL", "LessonAttendees", "Terminal", new { lessonId = Model.LessonId }, new AjaxOptions()
+            {
+                UpdateTargetId = "terminal-content"
+            }, new { @class = "flex-1 btn btn-secondary igor-button-secondary", id = "" })
+        </div>
+    </div>
+    }
+</div>

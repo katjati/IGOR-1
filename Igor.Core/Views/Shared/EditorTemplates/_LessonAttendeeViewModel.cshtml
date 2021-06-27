@@ -1,0 +1,40 @@
+﻿@model Igor.Core.Models.Terminal.LessonAttendeeViewModel
+
+
+<div class="left flex-3">
+    @Model.Name / @Model.Faction
+</div>
+@if (Model.IsActiveAttendance)
+{
+    using (Ajax.BeginForm("UpdateProgressModifier", "Terminal", null, new AjaxOptions()
+    {
+        HttpMethod = "post",
+        UpdateTargetId = "i-" + Model.StudentId,
+        InsertionMode = InsertionMode.Replace
+    }, new { @class = "horizontal-container flex-1 gap-10" }))
+    {
+        <div class="igor-container container-vertical">
+            <div class="igor-container container-horizontal right gap-10 flex-1 no-wrap right">
+                @Html.TextBoxFor(m => m.Modifier, new
+                {
+                    @class = "width-40 modifier-box ",
+                    progress = Model.ProgressId,
+                })
+                @Html.HiddenFor(m => m.Faction)
+                @Html.HiddenFor(m => m.Name)
+                @Html.HiddenFor(m => m.ProgressId)
+                @Html.HiddenFor(m => m.StudentId)
+                @Html.HiddenFor(m => m.ApprovalDate)
+                <button type="submit" value="submit" class="flex-1 center title button-color-header container padding-5 edit-modifier-btn disabled reduce-opacity" id="s-@Model.ProgressId">
+                    SAVE
+                </button>
+                <button type="button" class="flex-1 center title button-color-header container padding-5 delete-attendee-btn" id="@Model.ProgressId" data-toggle="modal" data-target="#delete-class-modal-container">
+                    DELETE
+                </button>
+            </div>
+            <div>
+                @Html.ValidationSummary()
+            </div>
+        </div>
+    }
+}

@@ -1,0 +1,85 @@
+﻿
+@using Microsoft.Ajax.Utilities
+@model Igor.Core.Models.Account.LoginViewModel
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@if (ViewBag.Title == null)
+{
+    ViewBag.Title = "Login";
+}
+else
+{
+    @ViewBag.Title
+}
+
+@using (Html.BeginForm("LoginAsync", "Account", FormMethod.Post, new { role = "form" }))
+{
+    if (ViewBag.ReturnUrl != null)
+    {
+        @Html.Hidden("returnUrl", (object)ViewBag.ReturnUrl)
+    }
+
+    <div class="igor-container container-vertical">
+
+    <div class="igor-container container-vertical content-box padding-15 gap-20 ">
+        <div class="igor-container center gap-20 padding-15 border-bottom">
+            <span class="title-text">LOG IN</span>
+        </div>
+        <div class="igor-container container-vertical gap-20 padding-25">
+            <div class="igor-container container-horizontal center gap-20 flex-1">
+                <div class="flex-1 right">
+                    Name
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBoxFor(m => m.UserName, new { @class = "form-control login-textbox" })
+                    <div class="flex-1 center">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["UserName"].Errors.Any())
+                        {
+                            <span class="field-validation-error">@ViewData.ModelState["UserName"].Errors[0].ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-20 flex-1">
+                <div class="flex-1 right">
+                    Password
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.PasswordFor(m => m.Password, new { @class = "form-control login-textbox" })
+                    <div class="flex-1 center">
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Password"].Errors.Any())
+                        {
+                            <span class="field-validation-error">@ViewData.ModelState["Password"].Errors[0].ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="igor-container container-horizontal center gap-20 flex-1">
+                @Html.ValidationSummary()
+            </div>
+
+        </div>
+        <div class="modal-footer igor-container container-horizontal gap-10">
+            <button type="submit" value="submit" class="flex-1 igor-button-main ">
+                LOG IN
+            </button>
+            @Ajax.ActionLink("CANCEL", "SchoolSchedule", "Terminal", new { }, new AjaxOptions()
+            {
+                UpdateTargetId = "terminal-content"
+            }, new { @class = "flex-1 btn btn-secondary igor-button-secondary", id = "" })
+        </div>
+    </div>
+</div>
+
+
+    <script>
+        $('document').ready(function () {
+            $('body').addClass('login-body');
+            $('footer').addClass('login-footer');
+        })
+    </script>
+
+}

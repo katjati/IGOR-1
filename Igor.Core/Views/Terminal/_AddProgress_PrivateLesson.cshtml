@@ -1,0 +1,142 @@
+﻿@model Igor.Core.Models.Terminal.AddPrivateLessonViewModel
+
+<div class="igor-container container-vertical content-box padding-15 gap-20  edit-panel">
+    <div class="igor-container center gap-20 padding-15 border-bottom">
+        <span class="title-text">ADD PRIVATE LESSON</span>
+    </div>
+    @using (Ajax.BeginForm("SaveAddPrivateLesson", "Terminal", new AjaxOptions()
+    {
+        UpdateTargetId = "terminal-content"
+    }))
+    {
+        <div class="igor-container container-vertical gap-20">
+            <div class="hidden">
+                @Html.TextBox("CharacterId", Model.CharacterId)
+                @Html.TextBox("UserId", Model.UserId)
+                @Html.TextBox("IsSchemaLearned", Model.IsSchemaLearned)
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Teacher Name
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("TeacherName", Model.TeacherName)
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["TeacherName"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["TeacherName"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Student Name
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("StudentName", Model.StudentName)
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["StudentName"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["StudentName"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Domain
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.DropDownList("Domain", Model.Domains)
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Modifier
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("Modifier", Model.Modifier)
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Modifier"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["Modifier"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    LearningPoints
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("LearningPoints", Model.LearningPoints)
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["LearningPoints"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["LearningPoints"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Description
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("Description", Model.Description)
+                </div>
+            </div>
+            <div class="igor-container container-horizontal center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Note
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("Comment", Model.Comment)
+                </div>
+            </div>
+            <div class="accordion igor-container center title flex-0 content-static margin-top">
+                <span class="flex-1 center">TEACH SCHEMA</span>
+                <span class="right title-text" id="panel-indicator"> + </span>
+            </div>
+            <div class="igor-panel igor-container container-vertical gap-20">
+                @*Schema*@
+                <div class="igor-container container-horizontal container center gap-10 flex-1">
+                    <div class="flex-1 right">
+                        Learned schema
+                    </div>
+                    <div class="flex-2 left direction-column padding-right-15">
+                        @Html.DropDownList("Schema", Model.Schemas)
+                        @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Schema"].Errors.Any())
+                        {
+                            <span class="field-validation-error">@ViewData.ModelState["Schema"].Errors[0].ErrorMessage</span>
+                        }
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer igor-container container-horizontal gap-10 margin-top">
+                <button type="submit" value="submit" class="flex-1 igor-button-main ">
+                    SAVE
+                </button>
+                @Ajax.ActionLink("CANCEL", "ManageCharacter", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                {
+                    UpdateTargetId = "terminal-content"
+                }, new { @class = "flex-1 btn btn-secondary igor-button-secondary", id = "" })
+            </div>
+        </div>
+    }
+</div>
+
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                $('#panel-indicator').html("+");
+                panel.style.maxHeight = null;
+                $('#IsSchemaLearned').attr("value", "False");
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                $('#panel-indicator').html("-");
+                $('#IsSchemaLearned').attr("value", "True");
+            }
+        });
+    }
+</script>

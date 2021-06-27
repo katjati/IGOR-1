@@ -1,0 +1,133 @@
+﻿@using Igor.Core.Models.Terminal
+@using Igor.Library.Global
+@using Igor.Library.Helpers
+@using Igor.Library.Models
+@using Igor.Library.Models.Shared
+@model Igor.Core.Models.Terminal.SchoolScheduleViewModel
+
+<div class="igor-container container-vertical modal-bg">
+    @if (Model.IsHeadmaster)
+    {
+        <div class="igor-container container-vertical flex-1">
+            <div class="igor-container container-horizontal right margin-bottom gap-10 align-center-v">
+                <div class="igor-container gap-20 right">
+                    <span class="title-text-small  ">ADD LESSON </span>
+                </div>
+                @if (!Model.IsArchived)
+                {
+                    @Ajax.ActionLink("+ ", "EditLesson", "Terminal", new { }, new AjaxOptions()
+                    {
+                        UpdateTargetId = "terminal-content"
+                    }, new { @class = "indicator-container-white-const center", id = "" })
+                }
+            </div>
+        </div>
+    }
+    <div class="igor-container container-vertical">
+        <div class="igor-container container-horizontal gap-30">
+            @foreach (DateTime date in Model.ScheduledLessons.Select(s => s.StartTime.Date).Distinct())
+            {
+                <div class="igor-container container-vertical stretch gap-10">
+                    <div class="igor-container center color-header padding-15 title">
+                        @date.DayOfWeek.ToString().ToUpper()
+                    </div>
+                    <div class="igor-container container-vertical stretch gap-10">
+                        @foreach (SchoolLessonViewModel lesson in Model.ScheduledLessons.Where(w => w.StartTime.Date == date))
+                        {
+                            bool isActive = IgorSettings.IsDebugMode ? true : lesson.EndTime > DateTime.Now;
+                            <div class="content-box igor-container container-horizontal min-width-250 padding-15 @(isActive ? "" : "reduce-opacity") ">
+                                <div class="igor-container container-vertical">
+                                    <div class="container-horizontal igor-container no-wrap">
+                                        <div class="container-vertical igor-container left">
+                                            <div class="color-text-shaded margin-bottom @(isActive ? "" : "reduce-opacity")">
+                                                @lesson.StartTime.ToShortTimeString() - @lesson.EndTime.ToShortTimeString()
+                                            </div>
+                                            <div class="title @(isActive ? "" : "reduce-opacity")">
+                                                @lesson.Topic
+                                            </div>
+                                            @if (!lesson.AdditionalInformation.IsNullOrEmpty())
+                                            {
+                                                <div class="@(isActive ? "" : "reduce-opacity")">
+                                                    [ @lesson.AdditionalInformation ]
+                                                </div>
+                                            }
+                                            <div class="color-text-shaded margin-top @(isActive ? "" : "reduce-opacity")">
+                                                @lesson.Teacher
+                                            </div>
+                                        </div>
+                                        <div class="indicator-container">
+                                            @lesson.Domain.GetDomainNameAbbreviationString()
+                                        </div>
+                                    </div>
+                                    @if (lesson.IsTeacher || Model.IsHeadmaster)
+                                    {
+                                        <div class="container-horizontal igor-container gap-10 margin-top stretch-vertical">
+                                            @Ajax.ActionLink("ATTENDANCE", "LessonAttendees", "Terminal", new { lessonId = lesson.LessonId }, new AjaxOptions()
+                                                {
+                                                    UpdateTargetId = "terminal-content"
+                                                }, new { @class = "igor-button-main-small flex-1", id = "" })
+                                            @if (!Model.IsArchived)
+                                            {
+                                                if (Model.IsHeadmaster)
+                                                {
+                                                    @Ajax.ActionLink("EDIT", "EditLesson", "Terminal", new { lessonId = lesson.LessonId }, new AjaxOptions()
+                                                    {
+                                                        UpdateTargetId = "terminal-content"
+                                                    }, new { @class = "igor-button-main-small flex-1", id = "" })
+                                                    <button type="button" class="igor-button-main-small flex-1 delete-lesson-btn" id="@lesson.LessonId" topic="@lesson.Topic" data-toggle="modal" data-target="#delete-class-modal-container">
+                                                        DELETE
+                                                    </button>
+                                                }
+                                            }
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+    </div>
+</div>
+@*MODAL*@
+<div id="delete-class-modal-container" class="modal fade" role="dialog">
+    <div id="delete-class-modal" class="modal-dialog">
+        <div class="modal-content  igor-modal content-box">
+            <div class="content-static padding-25 gap-10">
+                <div class="modal-body container-vertical margin-bottom" lessonId="">
+                    <div class="margin-bottom title" id="delete-message">
+                        Delete this lesson?
+                    </div>
+                </div>
+                <div class="modal-footer igor-container container-horizontal stretch-vertical gap-10">
+                    @Ajax.ActionLink("DELETE", "DeleteLesson", "Terminal", new { lessonId = 0 }, new AjaxOptions()
+                    {
+                        UpdateTargetId = "terminal-content",
+                        OnComplete = "CloseModal"
+                    }, new { @class = "flex-1 btn btn-secondary igor-button-main", id = "delete-button" })
+                    <button type="button" class="flex-1 btn btn-secondary igor-button-secondary" data-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).on("click", ".delete-lesson-btn", function () {
+        var lessonId = $(this).attr('id');
+        var lessonTopic = $(this).attr('topic');
+        var newHref = $('#delete-button').attr('href').replace(/lessonId=\d+/, 'lessonId=' + lessonId);
+        $('#delete-button').attr('href', newHref);
+        $('#delete-message').html('Delete lesson \"' + lessonTopic + '\"?');
+    });
+
+    function CloseModal() {
+        $('.modal-backdrop').remove();
+        $('#delete-class-modal-container').modal('hide');
+        $('body').removeClass('modal-open');
+    }
+</script>

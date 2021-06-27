@@ -1,0 +1,378 @@
+﻿@using Igor.Core.Models.Terminal
+@using Igor.Library.Global
+@using Igor.Library.Helpers
+@using Igor.Library.Models
+@model Igor.Core.Models.Terminal.ManageCharacterProgressViewModel
+
+@{
+    ViewBag.Title = "Manage character";
+}
+
+@*CHARACTER*@
+<div class="igor-container container-vertical flex-1 modal-bg">
+    <div class="igor-container center padding-15 gap-20 margin-bottom">
+        <span class="title-text">@Model.CharacterName.ToUpper()</span>
+        <span class="title-text-secondary"> / @Model.CharacterFaction.ToUpper()</span>
+    </div>
+</div>
+
+<div class="igor-container container-vertical gap-30 modal-bg">
+    @*DOMAINS*@
+
+    <div class="igor-container container-vertical content-static stretch">
+        <button class="accordion igor-container center content-box  padding-15 title flex-0">
+            <span class="flex-1 center">DETAILED PROGRESS</span>
+            <span class="right title-text" id="panel-indicator"> + </span>
+        </button>
+        <div class="igor-panel">
+            <div class="igor-container gap-30 margin-top padding-15">
+                @foreach (KnowledgeDomainViewModel domainProgress in Model.KnowledgeDomainProgresses)
+                {
+                    <div class="content-box igor-container container-vertical ">
+                        <div class="igor-container center color-header padding-15 title flex-0">
+                            @domainProgress.Domain.GetDomainNameString()
+                        </div>
+                        <div class="igor-container container-horizontal flex-1 center">
+                            <div class="igor-container container-vertical center gap-20 margin-top">
+                                <div class="igor-container container-vertical center gap-10">
+                                    <div class="color-text-shaded flex-1 center">
+                                        LEVEL
+                                    </div>
+                                    <div class="round-container container-vertical">
+                                        <div class="title-text-secondary-small">
+                                            @(domainProgress.LevelDisplay)
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="gap-10 igor-container container-vertical">
+                                    <div class="color-text-shaded flex-1 center container-vertical">
+                                        <div>TOTAL LEARNING POINTS</div>
+                                        <div>(LP):</div>
+                                    </div>
+                                    <div class=" flex-1 center">@(domainProgress.LearningTypesDetails.Sum(s => s.ActiveCount).GetLearningPointsRepresentation())</div>
+                                </div>
+                            </div>
+
+                            <div class="igor-container container-vertical list flex-2">
+                                @foreach (LearningTypeViewModel learningType in domainProgress.LearningTypesDetails)
+                                {
+                                    <div class="igor-container container-horizontal padding-5 left align-center-v item min-width">
+                                        <div class="left flex-3">
+                                            @learningType.Type.GetLearningTypeString()
+                                        </div>
+                                        <div class="no-wrap">
+                                            @if (learningType.ActiveCount > 0)
+                                            {
+                                                <span class="color-text-shaded">
+                                                    @(learningType.ActiveCount.GetLearningPointsRepresentation()) LP
+                                                </span>
+                                            }
+                                            else
+                                            {
+                                                <span class="color-text-shaded">
+                                                    -
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="igor-container container-horizontal gap-30">
+        <div class="igor-container container-vertical gap-30 flex-1">
+            @*AVAILABLE SCHEMAS*@
+            <div class="igor-container container-vertical gap-30 flex-1  max-h-30">
+                <div class="igor-container container-vertical content-box max-h-30 ">
+                    <div class="igor-container center color-header padding-15 title">
+                        AVAILABLE SCHEMAS
+                    </div>
+                    @if (Model.AvailableItemSchemas.IsNullOrEmpty())
+                    {
+                        <div class="igor-container container-horizontal padding-15 align-center-v item">
+                            <div class="center flex-3">
+                                [ No schemas ]
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="igor-container container-vertical list flex-2 max-h ">
+                            @foreach (ItemSchemaViewModel schema in Model.AvailableItemSchemas.Where(w => !Model.KnownItemSchemas.Select(s => s.SchemaId).Contains(w.SchemaId)))
+                            {
+                                <div class="igor-container container-horizontal padding-15 left align-center-v item">
+                                    @{
+                                        string schemaName = "";
+                                        if (@schema.Name.IsNullOrEmpty())
+                                        {
+                                            schemaName = schema.SchemaType == ItemSchemaTypes.Crafting ? (schema.OutputItems?.First()?.Name + " crafting schema" ?? "") : (schema?.InputItems?.First()?.Name + " scraping schema" ?? "");
+                                        }
+                                        else
+                                        {
+                                            schemaName = schema.Name;
+                                        }
+                                    }
+                                    <div class="left flex-3">
+                                        @schemaName
+                                    </div>
+                                    <div class="flex-1 right container-horizontal align-center-v gap-10">
+                                        <button type="button" class="igor-button-main-small flex-1 exchange-schema-btn" schema-id="@schema.SchemaId" schema-name="@schemaName" data-toggle="modal" data-target="#exchange-schema-modal-container">
+                                            EXCHANGE
+                                        </button>
+
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+            @*KNOWN SCHEMAS*@
+
+
+            <div class="igor-container container-vertical content-box max-h-30">
+
+                <div class="igor-container center color-header padding-15 title">
+                    KNOWN SCHEMAS
+                </div>
+                @if (!Model.KnownItemSchemas.IsNullOrEmpty())
+                {
+                    <div class="igor-container container-vertical flex-2 list gap-10  max-h-30">
+                        @foreach (ItemSchemaViewModel schema in Model.KnownItemSchemas)
+                        {
+
+                            <div class="igor-container container-horizontal padding-15 left gap-10 align-center-v item @(schema.IsAvailable ? "content-static" : "")">
+                                @{
+                                    string schemaName = "";
+                                    if (@schema.Name.IsNullOrEmpty())
+                                    {
+                                        schemaName = schema.SchemaType == ItemSchemaTypes.Crafting ? (schema.OutputItems?.First()?.Name + " crafting schema" ?? "") : (schema?.InputItems?.First()?.Name + " scraping schema" ?? "");
+                                    }
+                                    else
+                                    {
+                                        schemaName = schema.Name;
+                                    }
+                                }
+                                <div class="left flex-3">
+                                    @schemaName
+                                </div>
+                                <div class="flex-1 right container-horizontal align-center-v color-text-shaded">
+                                    @(schema.Progress.GetSchemasRepresentation()) lvl
+                                </div>
+                                <button type="button" class="igor-button-main-small flex-1 delete-schema-btn" schema-id="@schema.SchemaId" schema-name="@schemaName" data-toggle="modal" data-target="#delete-schema-modal-container">
+                                    DELETE
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="igor-container container-horizontal padding-15 align-center-v item">
+                        <div class="center flex-3">
+                            [ No schemas ]
+                        </div>
+                    </div>
+                }
+            </div>
+
+        </div>
+        <div class="igor-container container-vertical gap-30 flex-1">
+            @*ADD PROGRESS*@
+            <div class="content-static igor-container container-vertical center">
+                <div class="title-text-secondary-small padding-15 border-bottom content-static flex-1 stretch-horizontal center ">
+                    ADD PROGRESS
+                </div>
+                <div class=" igor-container container-horizontal gap-10 padding-15 color-text-shaded">
+                    <div class="igor-container container-vertical center padding-15 equal-width-5 gap-10">
+                        @Ajax.ActionLink("+", "AddSchema", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                        {
+                            UpdateTargetId = "terminal-content"
+                        }, new { @class = "indicator-container-white-const", id = "" })
+                        <div class=""> SCHEMA </div>
+                    </div>
+                    <div class="igor-container container-vertical center padding-15 equal-width-5 gap-10">
+                        @Ajax.ActionLink("+", "AddPrivateLesson", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                        {
+                            UpdateTargetId = "terminal-content"
+                        }, new { @class = "indicator-container-white-const", id = "" })
+                        <div class=""> PRIVATE LESSON </div>
+                    </div>
+                    <div class="igor-container container-vertical center padding-15 equal-width-5 gap-10">
+                        @Ajax.ActionLink("+", "AddSpecialization", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                        {
+                            UpdateTargetId = "terminal-content"
+                        }, new { @class = "indicator-container-white-const", id = "" })
+                        <div class=""> SPECIALIZATION </div>
+                    </div>
+                    <div class="igor-container container-vertical center padding-15 equal-width-5 gap-10">
+                        @Ajax.ActionLink("+", "AddBook", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                        {
+                            UpdateTargetId = "terminal-content"
+                        }, new { @class = "indicator-container-white-const", id = "" })
+                        <div class=""> BOOK </div>
+                    </div>
+                    <div class="igor-container container-vertical center padding-15 equal-width-5 gap-10">
+                        @Ajax.ActionLink("+", "AddMerit", "Terminal", new { characterId = Model.CharacterId }, new AjaxOptions()
+                        {
+                            UpdateTargetId = "terminal-content"
+                        }, new { @class = "indicator-container-white-const", id = "" })
+                        <div class=""> MERIT </div>
+                    </div>
+
+                </div>
+            </div>
+            @*SPECIALIZATIONS*@
+            <div class="igor-container container-vertical content-box flex-1 max-h-30 ">
+                <div class="container center color-header padding-15 title">
+                    SPECIALIZATIONS
+                </div>
+                @if (Model.Specializations.Any())
+                {
+                    <div class="igor-container container-vertical list flex-2 max-h ">
+                        @foreach (SpecializationViewModel specialization in Model.Specializations)
+                        {
+                            <div class="igor-container container-horizontal padding-15 left align-center-v item">
+                                <div class="left flex-3">
+                                    @specialization.Name
+                                </div>
+                                <button type="button" class="igor-button-main-small flex-1 delete-specialization-btn" spec-id="@specialization.Id" spec-name="@specialization.Name" data-toggle="modal" data-target="#delete-spec-modal-container">
+                                    DELETE
+                                </button>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="igor-container container-horizontal padding-15 align-center-v item">
+                        <div class="center flex-3">
+                            [ No specializations ]
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@*MODAL*@
+<div id="delete-spec-modal-container" class="modal fade" role="dialog">
+    <div id="delete-spec-modal" class="modal-dialog">
+        <div class="modal-content  igor-modal content-box">
+            <div class="content-static padding-25 gap-10">
+                <div class="modal-body container-vertical margin-bottom" lessonId="">
+                    <div class="margin-bottom title" id="delete-message-spec">
+                        Delete progress?
+                    </div>
+                </div>
+                <div class="modal-footer igor-container container-horizontal stretch-vertical gap-10">
+                    @Ajax.ActionLink("DELETE", "DeleteProgressForCharacter", "Terminal", new { progressId = 0, characterId = Model.CharacterId }, new AjaxOptions()
+                    {
+                        UpdateTargetId = "terminal-content",
+                        OnComplete = "CloseModal"
+                    }, new { @class = "flex-1 btn btn-secondary igor-button-main", id = "delete-button-spec" })
+                    <button type="button" class="flex-1 btn btn-secondary igor-button-secondary" data-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*MODAL*@
+<div id="delete-schema-modal-container" class="modal fade" role="dialog">
+    <div id="delete-schema-modal" class="modal-dialog">
+        <div class="modal-content  igor-modal content-box">
+            <div class="content-static padding-25 gap-10">
+                <div class="modal-body container-vertical margin-bottom" lessonId="">
+                    <div class="margin-bottom title" id="delete-message-schema">
+                        Delete spec?
+                    </div>
+                </div>
+                <div class="modal-footer igor-container container-horizontal stretch-vertical gap-10">
+                    @Ajax.ActionLink("DELETE", "DeleteSchemaForCharacter", "Terminal", new { schemaId = 0, characterId = Model.CharacterId }, new AjaxOptions()
+                    {
+                        UpdateTargetId = "terminal-content",
+                        OnComplete = "CloseModal"
+                    }, new { @class = "flex-1 btn btn-secondary igor-button-main", id = "delete-button-schema" })
+                    <button type="button" class="flex-1 btn btn-secondary igor-button-secondary" data-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*MODAL*@
+<div id="exchange-schema-modal-container" class="modal fade" role="dialog">
+    <div id="exchange-schema-modal" class="modal-dialog">
+        <div class="modal-content  igor-modal content-box">
+            <div class="content-static padding-25 gap-10">
+                <div class="modal-body container-vertical margin-bottom" lessonId="">
+                    <div class="margin-bottom title" id="exchange-message-schema">
+                        Exchange learning points for a schema?
+                    </div>
+                </div>
+                <div class="modal-footer igor-container container-horizontal stretch-vertical gap-10">
+                    @Ajax.ActionLink("EXCHANGE", "ExchangeSchema", "Terminal", new { schemaId = 0, characterId = Model.CharacterId }, new AjaxOptions()
+                       {
+                           UpdateTargetId = "terminal-content",
+                           OnComplete = "CloseModal"
+                       }, new { @class = "igor-button-main-small flex-1", id = "exchange-button-schema" })
+                    <button type="button" class="flex-1 btn btn-secondary igor-button-secondary" data-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var acc = document.getElementsByClassName("accordion");
+    var i;
+
+    for (i = 0; i < acc.length; i++) {
+        acc[i].addEventListener("click", function () {
+            this.classList.toggle("active");
+
+            var panel = this.nextElementSibling;
+            if (panel.style.maxHeight) {
+                $('#panel-indicator').html("+");
+                panel.style.maxHeight = null;
+            } else {
+                panel.style.maxHeight = panel.scrollHeight + "px";
+                $('#panel-indicator').html("-");
+            }
+        });
+    }
+
+    $(document).on("click", ".delete-specialization-btn", function () {
+        var progressId = $(this).attr('spec-id');
+        var progressName = $(this).attr('spec-name');
+        var newHref = $('#delete-button-spec').attr('href').replace(/progressId=\d+/, 'progressId=' + progressId);
+        $('#delete-button-spec').attr('href', newHref);
+        $('#delete-message-spec').html('Delete specialization \"' + progressName + '\"?');
+    });
+
+    $(document).on("click", ".delete-schema-btn", function () {
+        var schemaId = $(this).attr('schema-id');
+        var progressName = $(this).attr('schema-name');
+        var newHref = $('#delete-button-schema').attr('href').replace(/schemaId=\d+/, 'schemaId=' + schemaId);
+        $('#delete-button-schema').attr('href', newHref);
+        $('#delete-message-schema').html('Delete schema \"' + progressName + '\"?');
+    });
+
+    $(document).on("click", ".exchange-schema-btn", function () {
+        var schemaId = $(this).attr('schema-id');
+        var progressName = $(this).attr('schema-name');
+        var newHref = $('#exchange-button-schema').attr('href').replace(/schemaId=\d+/, 'schemaId=' + schemaId);
+        $('#exchange-button-schema').attr('href', newHref);
+        $('#exchange-message-schema').html('Exchange learning points for \"' + progressName + '\"?');
+    });
+
+    function CloseModal() {
+        $('.modal-backdrop').remove();
+        $('#delete-class-modal-container').modal('hide');
+        $('body').removeClass('modal-open');
+    }
+</script>

@@ -1,0 +1,120 @@
+﻿@using Igor.Core.Models.Terminal
+@using Igor.Library.Helpers
+@using Igor.Library.Models
+@model Igor.Core.Models.Terminal.EditLessonViewModel
+
+<div class="igor-container container-vertical content-box padding-15 gap-20  edit-panel">
+    <div class="igor-container center gap-20 padding-15 border-bottom">
+        <span class="title-text">@(Model.IsEdited ? "EDIT LESSON" : "ADD LESSON")</span>
+    </div>
+    @using (Ajax.BeginForm("SaveLesson", "Terminal", new AjaxOptions()
+    {
+        UpdateTargetId = "terminal-content"
+    }))
+    {
+        <div class="igor-container container-vertical gap-20">
+            <div class="hidden">
+                @Html.TextBox("LessonId", Model.LessonId)
+
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Topic
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBoxFor(m=>m.Topic)
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Additional information
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("AdditionalInformation", Model?.AdditionalInformation ?? "")
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Internal comment
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("Comment", Model?.Comment ?? "")
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Teacher Name
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.TextBox("TeacherName", Model?.TeacherName ?? "")
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["TeacherName"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["TeacherName"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Domain
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.DropDownList("Domain", Model.Domains)
+                </div>
+            </div>
+            @*<div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Language
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    @Html.DropDownList("Language", Model.Languages)
+                </div>
+            </div>*@
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Day
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    <select class="form-control" id="Day" name="Day">
+                        @foreach (SelectListItem option in Model.Dates)
+                        {
+                            <option value="@option.Value" @(option.Text == Model.Day.DayOfWeek.ToString() ? "selected" : "")>@option.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Start time
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    <input type="time" name="Start" id="Start" value="@(Model.StartTime.ToShortTimeString() ?? "00:00")" /> <br />
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Start"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["Start"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="igor-container-horizontal container center gap-10 flex-1">
+                <div class="flex-1 right">
+                    Duration [min]
+                </div>
+                <div class="flex-2 left direction-column padding-right-15">
+                    <span>@Html.TextBox("Duration", Model.Duration, new { type = "number" })</span>
+                    @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Duration"].Errors.Any())
+                    {
+                        <span class="field-validation-error">@ViewData.ModelState["Duration"].Errors[0].ErrorMessage</span>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer igor-container container-horizontal gap-10 margin-top">
+                <button type="submit" value="submit" class="flex-1 igor-button-main ">
+                    SAVE
+                </button>
+                @Ajax.ActionLink("CANCEL", "SchoolSchedule", "Terminal", new {}, new AjaxOptions()
+                {
+                    UpdateTargetId = "terminal-content"
+                }, new {@class = "flex-1 btn btn-secondary igor-button-secondary", id = ""})
+            </div>
+        </div>
+    }
+</div>

@@ -1,0 +1,43 @@
+﻿@model Igor.Core.Models.Terminal.CharacterBasicInfoViewModel
+
+<div class="igor-container container-vertical edit-panel">
+    @using (Ajax.BeginForm("ValidateCharacter", "Terminal", new AjaxOptions()
+    {
+        UpdateTargetId = "terminal-content"
+    }))
+    {
+        
+        <div class="igor-container container-vertical content-box padding-15 gap-20 fit-content-width ">
+            <div class="igor-container center gap-20 padding-15 border-bottom">
+                <span class="title-text">FIND CHARACTER</span>
+            </div>
+            <div class="igor-container container-vertical gap-20 padding-25">
+                <div class="igor-container container-horizontal center gap-20 flex-1">
+                    <div class="flex-1 right">
+                        Name
+                    </div>
+                    <div class="flex-2 left direction-column padding-right-15">
+                        @Html.TextBoxFor(m => m.Name)
+                        <div class="flex-1 center">
+                            @if (!ViewData.ModelState.IsValid && ViewData.ModelState["Name"].Errors.Any())
+                            {
+                                <span class="field-validation-error">@ViewData.ModelState["Name"].Errors[0].ErrorMessage</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @Html.HiddenFor(m => m.Faction)
+            @Html.HiddenFor(m => m.Id)
+            <div class="modal-footer igor-container container-horizontal gap-10">
+                <button type="submit" value="submit" class="flex-1 igor-button-main ">
+                    FIND
+                </button>
+                @Ajax.ActionLink("CANCEL", "SchoolSchedule", "Terminal", new {}, new AjaxOptions()
+                {
+                    UpdateTargetId = "terminal-content"
+                }, new {@class = "flex-1 btn btn-secondary igor-button-secondary", id = ""})
+            </div>
+        </div>
+    }
+</div>

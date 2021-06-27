@@ -1,0 +1,112 @@
+﻿@using Igor.Core.Models.Terminal
+@using Igor.Library.Global
+@using Igor.Library.Models.Shared
+@model Igor.Core.Models.Terminal.LessonAttendeesViewModel
+
+@Scripts.Render("~/bundles/jqueryval")
+@{
+    bool IsActive = Model.LessonModel.IsActiveAttendance;
+}
+<div class="igor-container container-horizontal gap-30 modal-bg">
+    <div class="igor-container container-vertical stretch flex-1 gap-30">
+        <div class="container-vertical igor-container left content-box padding-15">
+            <div class="color-text-shaded margin-bottom">
+                @Model.LessonModel.StartTime.ToShortTimeString() - @Model.LessonModel.EndTime.ToShortTimeString()
+            </div>
+            <div class="title">
+                @Model.LessonModel.Topic
+            </div>
+            @if (!Model.LessonModel.AdditionalInformation.IsNullOrEmpty())
+            {
+                <div>
+                    [ @Model.LessonModel.AdditionalInformation ]
+                </div>
+            }
+            <div class="color-text-shaded margin-top">
+                @Model.LessonModel.Teacher
+            </div>
+        </div>
+        @if (IsActive)
+        {
+            @Ajax.ActionLink("ADD ATTENDEE", "AddNewAttendee", "Terminal", new {lessonId = Model.LessonId}, new AjaxOptions()
+            {
+                HttpMethod = "post",
+                InsertionMode = InsertionMode.Replace,
+                UpdateTargetId = "terminal-content"
+            }, new {@class = "igor-container center color-header padding-40 title", id = ""})
+        }
+    </div>
+    <div class="igor-container container-vertical content-box flex-2 gap-10">
+        <div class="igor-container center color-header padding-15 title">
+            ATTENDANCE LIST
+        </div>
+        <div class="igor-container container-vertical list flex-2 max-h ">
+            @for (int i = 0; i < Model.Attendees.Count; i++)
+            {
+                LessonAttendeeViewModel student = Model.Attendees[i];
+                <div class="igor-container container-horizontal padding-15 left item" id="i-@student.StudentId">
+                    @Html.Partial("EditorTemplates/_LessonAttendeeViewModel", Model.Attendees[i])
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $.validator.methods.range = function (value, element, param) {
+        var globalizedValue = value.replace(",", ".");
+        return this.optional(element) || (globalizedValue >= param[0] && globalizedValue <= param[1]);
+    }
+
+    $.validator.methods.number = function (value, element) {
+        return this.optional(element) || /-?(?:\d+|\d{1,3}(?:[\s\.,]\d{3})+)(?:[\.,]\d+)?$/.test(value);
+    }
+    $.validator.methods.date = function (value, element) {
+        var date = value.split("/");
+        return this.optional(element) || !/Invalid|NaN/.test(new Date(date[2], date[1], date[0]).toString());
+    }
+</script>
+
+@*MODAL*@
+<div id="delete-class-modal-container" class="modal fade" role="dialog">
+    <div id="delete-class-modal" class="modal-dialog">
+        <div class="modal-content  igor-modal content-box">
+            <div class="content-static padding-25 gap-10">
+                <div class="modal-body container-vertical margin-bottom" progressId="">
+                    <div class="margin-bottom title">
+                        Delete this attendee?
+                    </div>
+                </div>
+                <div class="modal-footer igor-container container-horizontal stretch-vertical gap-10">
+                    @Ajax.ActionLink("DELETE", "DeleteProgress", "Terminal", new { progressId = 0, lessonId = Model.LessonId }, new AjaxOptions()
+                    {
+                        UpdateTargetId = "terminal-content",
+                        OnComplete = "CloseModal"
+                    }, new {@class = "flex-1 btn btn-secondary igor-button-main", id = "delete-button" })
+                    <button type="button" class="flex-1 btn btn-secondary igor-button-secondary" data-dismiss="modal">CANCEL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).on("click", ".delete-attendee-btn", function () {
+        var progressId = $(this).attr('id');
+        var newHref = $('#delete-button').attr('href').replace(/progressId=\d+/, 'progressId=' + progressId);
+        $('#delete-button').attr('href', newHref);
+    });
+
+    $(document).on("change", ".modifier-box", function () {
+        var progress = $(this).attr('progress');
+        $('#s-'+progress).removeClass('disabled');
+        $('#s-' + progress).removeClass('reduce-opacity');
+    });
+
+    function CloseModal() {
+        $('.modal-backdrop').remove();
+        $('#delete-class-modal-container').modal('hide')
+        $('body').removeClass('modal-open');
+    }
+</script>

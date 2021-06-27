@@ -1,0 +1,98 @@
+﻿
+@using Igor.Core.Models.Terminal
+@using Igor.Library.Global
+@using Igor.Library.Helpers
+@using Igor.Library.Models
+@model Igor.Core.Models.Terminal.ItemSchemasViewModel
+@{
+    ViewBag.Title = "Item schemas";
+}
+
+<div class="igor-container container-vertical gap-30">
+    <div class="igor-container container-horizontal gap-30">
+
+        <div class="igor-container container-vertical content-box ">
+            <div class="igor-container center color-header padding-15 title">
+                AVAILABLE SCHEMAS
+            </div>
+            <div class="igor-container container-vertical list flex-2 max-h ">
+                @foreach (ItemSchemaViewModel schema in Model.BasicItemSchemas.Where(w => !Model.KnownItemSchemas.Select(s => s.SchemaId).Contains(w.SchemaId)))
+                {
+
+                    <div class="igor-container container-horizontal padding-15 left align-center-v item @(schema.IsAvailable ? "content-static" : "")">
+                        <div class="left flex-3">
+                            @{
+                                string schemaName = schema.Name;
+                                if (@schema.Name.IsNullOrEmpty())
+                                {
+                                    schemaName = schema.SchemaType == ItemSchemaTypes.Crafting ? (schema.OutputItems?.First()?.Name + " crafting schema." ?? "") : (schema?.InputItems?.First()?.Name + " scraping schema." ?? "");
+                                }
+                            }
+                            @Ajax.ActionLink(@schemaName,
+                                "ItemSchemaDetails",
+                                new { schemaId = schema.SchemaId, isKnown = schema.IsKnown },
+                                new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, UpdateTargetId = "schema-details" },
+                                new { onclick = "handler" })
+                        </div>
+                        <div class="flex-1 right igor-container-horizontal align-center-v gap-10">
+                            @if (schema.IsAvailable)
+                            {
+                                <div class="color-text-shaded">
+                                    AVAILABLE
+                                </div>
+                            }
+                            <div class="min-width-100 right igor-container container-horizontal align-center-v gap-10">
+                                @foreach (DomainTypes domain in schema.Domains)
+                                {
+                                    <div class="indicator-container ">
+                                        @domain.GetDomainNameAbbreviationString()
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="igor-container container-vertical gap-30 max-width-650">
+            @if (!Model.KnownItemSchemas.IsNullOrEmpty())
+            {
+                <div class="igor-container container-vertical ">
+
+                    <div class="igor-container center color-header padding-15 title">
+                        KNOWN SCHEMAS
+                    </div>
+                    <div class="igor-container container-vertical content-box flex-2 list max-h-30">
+                        @foreach (ItemSchemaViewModel schema in Model.KnownItemSchemas)
+                        {
+                            <div class="igor-container container-horizontal padding-15 left align-center-v item @(schema.IsAvailable ? "content-static" : "")">
+                                <div class="left flex-3">
+                                    @{
+                                        string schemaName = schema.Name;
+                                        if (@schema.Name.IsNullOrEmpty())
+                                        {
+                                            schemaName = schema.SchemaType == ItemSchemaTypes.Crafting ? (schema.OutputItems?.First()?.Name + " crafting schema." ?? "") : (schema?.InputItems?.First()?.Name + " scraping schema." ?? "");
+                                        }
+                                    }
+                                    @Ajax.ActionLink(@schemaName, 
+                                        "ItemSchemaDetails", 
+                                        new { schemaId = schema.SchemaId, isKnown = schema.IsKnown }, 
+                                        new AjaxOptions { HttpMethod = "POST", InsertionMode = InsertionMode.Replace, UpdateTargetId = "schema-details" },
+                                        new { onclick = "handler" })
+                                </div>
+                                <div class="flex-1 right igor-container-horizontal align-center-v gap-10 color-text-shaded ">
+                                    @schema.Progress.GetSchemasRepresentation() lvl
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            <div class="igor-container container-vertical content-box padding-15 flex-2 left gap-10 " id="schema-details">
+                @{ ItemSchemaViewModel current = Model.KnownItemSchemas.Any() ? Model.KnownItemSchemas.First() : Model.BasicItemSchemas.First();}
+                @Html.Partial("_ItemSchema_Details", current)
+            </div>
+        </div>
+    </div>
+
+</div>

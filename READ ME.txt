@@ -1,0 +1,5 @@
+Web application can be run using Microsoft Visual Studio Community 2017 or newer, with Nuget packet installed. It requires MySQL Server v. 8.0.25, MySQL Shell v. 8.0.25 and Connector/NET 8.0.25 for MySQL. 
+
+Database can be initialized and populated with examplary data by running "update-database" command in Nuget terminal on Igor.Library project.
+
+List of users include: kas (admin, headmaster roles), wizzl, jacobi, dzx, radzu, krzesio, gibbs, tarot, duch, fatum, kuna, sandacz and wrubel. Character names and user passwords are the same as usernames.

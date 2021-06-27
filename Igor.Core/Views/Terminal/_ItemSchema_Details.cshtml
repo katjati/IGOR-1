@@ -1,0 +1,69 @@
+﻿@using Igor.Library.Models
+@using Igor.Library.Global
+@model Igor.Core.Models.Terminal.ItemSchemaViewModel
+
+<div class="igor-container center color-header padding-15 margin title">
+    @if (Model.Name.IsNullOrEmpty())
+    {
+        @((Model.SchemaType == ItemSchemaTypes.Crafting ? (Model.OutputItems?.First()?.Name + " crafting schema" ?? "") : (Model?.InputItems?.First()?.Name + " scraping schema." ?? "")).ToUpper())
+    }
+    else
+    {
+        @Model.Name.ToUpper()
+    }
+</div>
+<div class="igor-container container-vertical gap-20 margin-bottom">
+    <div>
+        <span class="color-text-shaded">Type: </span>@Model.SchemaType.ToString()
+    </div>
+    @if (!Model.Description.IsNullOrEmpty())
+    {
+        <div class="igor-container container-vertical gap-10">
+        <div class="color-text-shaded">
+            Description:
+        </div>
+            <div>
+                @Model.OutputItems.FirstOrDefault().Name - @Model.Description
+            </div>
+        </div>
+    }
+    @if (!Model.Mechanics.IsNullOrEmpty())
+    {
+        <div class="igor-container container-vertical gap-10">
+            <div class="color-text-shaded">
+                Mechanics:
+            </div>
+            <div>
+                @Model.Mechanics
+            </div>
+        </div>
+    }
+</div>
+<div class="igor-container container-horizontal gap-10 stretch-vertical">
+    <div class="igor-container container-vertical flex-1 content-static">
+        <div class="igor-container center color-header-shaded padding-15 stretch title flex-0">
+            Input
+        </div>
+        <ul>
+            @foreach (string item in Model.InputItems.Select(s => s.Name))
+            {
+                <li>
+                    @item
+                </li>
+            }
+        </ul>
+    </div>
+    <div class="igor-container container-vertical flex-1 content-static">
+        <div class="igor-container center color-header-shaded padding-15 stretch title flex-0">
+            Output
+        </div>
+        <ul>
+            @foreach (string item in Model.OutputItems.Select(s => s.Name))
+            {
+                <li>
+                    @item
+                </li>
+            }
+        </ul>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+﻿
+@using Igor.Core.Models
+@using Igor.Library
+@using Microsoft.AspNet.Identity
+
+<div class="igor-container container-horizontal stretch center gap-10">
+    <h1 class="site-header-logo title white">
+        <a href="/">
+            <div id="igor-digital"></div>
+            <script src="~/Scripts/igor-digital.js"></script>
+        </a>
+    </h1>
+
+    <div class="igor-container container-horizontal flex-1 gap-10 stretch">
+        @Ajax.ActionLink("School schedule", "SchoolSchedule", "Terminal", new { }, new AjaxOptions()
+        {
+            UpdateTargetId = "terminal-content"
+        }, new { @class = "menu-opt active content-static title-text-small" })
+
+        @Ajax.ActionLink("Schemas", "ItemSchemas", "Terminal", new { }, new AjaxOptions()
+        {
+            UpdateTargetId = "terminal-content"
+        }, new { @class = "menu-opt content-static title-text-small" })
+
+        @if (User.Identity.IsAuthenticated)
+        {
+            @Ajax.ActionLink("Progress", "CharacterProgress", "Terminal", new { }, new AjaxOptions()
+            {
+                UpdateTargetId = "terminal-content"
+            }, new { @class = "menu-opt content-static title-text-small" })
+        }
+        @if (User.IsInRole(RoleConstants.HeadmasterRole))
+        {
+            @Ajax.ActionLink("Manage Character", "FindCharacter", "Terminal", new { }, new AjaxOptions()
+            {
+                UpdateTargetId = "terminal-content"
+            }, new { @class = "menu-opt content-static title-text-small" })
+        }
+    </div>
+    <div class="fit-content-width container-horizontal igor-container right gap-10">
+        @if (!User.Identity.IsAuthenticated)
+        {
+            <div class="title-text-secondary-small">
+                @Html.ActionLink("Log in", "Login", "Account")
+            </div>
+        }
+        else
+        {
+            <div class="title-text-small">
+                @User.Identity.Name.ToUpper()
+            </div>
+            <div class="title-text-secondary-small">
+                / @Html.ActionLink("Log out", "SignOut", "Account")
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    $(document).on("click", ".menu-opt", function () {
+        console.log($(this));
+        $('.menu-opt').removeClass('active');
+        $(this).addClass('active');
+    });
+</script>

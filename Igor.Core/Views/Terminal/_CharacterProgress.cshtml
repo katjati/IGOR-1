@@ -1,0 +1,77 @@
+﻿@using Igor.Core.Models.Terminal
+@using Igor.Library.Global
+@using Igor.Library.Helpers
+@model Igor.Core.Models.Terminal.CharacterProgressViewModel
+
+<div class="igor-container container-vertical gap-30">
+    <div class="igor-container gap-30">
+        @foreach (KnowledgeDomainViewModel domainProgress in Model.KnowledgeDomainProgresses)
+        {
+            <div class="content-box igor-container container-vertical ">
+                <div class="igor-container center color-header padding-15 title flex-0">
+                    @domainProgress.Domain.GetDomainNameString()
+                </div>
+                <div class="igor-container container-horizontal flex-1 center">
+                    <div class="igor-container container-vertical center gap-20 margin-top">
+                        <div class="igor-container container-vertical center gap-10">
+                            <div class="color-text-shaded flex-1 center">
+                                LEVEL
+                            </div>
+                            <div class="round-container container-vertical">
+                                <div class="title-text-secondary-small">
+                                    @(domainProgress.LevelDisplay)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="gap-10 igor-container container-vertical">
+                            <div class="color-text-shaded flex-1 center container-vertical">
+                                <div>TOTAL LEARNING POINTS (LP):</div>
+                            </div>
+                            <div class=" flex-1 center">@(domainProgress.LearningTypesDetails.Sum(s => s.ActiveCount).GetLearningPointsRepresentation())</div>
+                        </div>
+                    </div>
+
+                    <div class="igor-container container-vertical list flex-2">
+                        @foreach (LearningTypeViewModel learningType in domainProgress.LearningTypeDetailsFilterd)
+                        {
+                            <div class="igor-container container-horizontal padding-15 left align-center-v item min-width">
+                                <div class="left flex-3">
+                                    @learningType.Type.GetLearningTypeString()
+                                </div>
+                                <div class="no-wrap">
+                                    @if (learningType.ActiveCount > 0)
+                                    {
+                                        <span class="color-text-shaded">
+                                            @(learningType.ActiveCount.GetLearningPointsRepresentation()) LP
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="color-text-shaded">
+                                            -
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    @if (Model.Specializations.Any())
+    {
+        <div class="igor-container container-vertical gap-10">
+            <div class="color-text-shaded margin-bottom">SPECIALIZATIONS</div>
+            <div class="igor-container container-horizontal center gap-30">
+                @foreach (SpecializationViewModel specialization in Model.Specializations)
+                {
+                    <div class="content-box padding-15">
+                        @specialization.Name
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
